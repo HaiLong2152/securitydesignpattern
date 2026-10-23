@@ -1,0 +1,28 @@
+services:
+  minio:
+    build: ./minio-mock
+    ports:
+      - "9000:9000"
+
+  user-service:
+    build: ./user-service
+    ports:
+      - "3001:3001" # Mở cổng để đo benchmark gọi thẳng
+    environment:
+      - MINIO_ENDPOINT=localhost # Trả về URL có domain localhost để client bên ngoài gọi được
+      - MINIO_PORT=9000
+    depends_on:
+      - minio
+
+  order-service:
+    build: ./order-service
+    ports:
+      - "3002:3002"
+
+  api-gateway:
+    build: ./api-gateway
+    ports:
+      - "8080:8080"
+    depends_on:
+      - user-service
+      - order-service
